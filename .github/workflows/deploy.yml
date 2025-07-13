@@ -1,0 +1,27 @@
+name: Deploy to Ubuntu Server
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Deploy to server
+      run: |
+        ssh -o StrictHostKeyChecking=no root@24.199.81.142 << EOF
+        cd /root/CYSX/CYS && git pull origin master
+        dotnet publish --configuration Release --output /root/CYSX/CYS/bin/Release/net8.0
+        sudo systemctl restart CYSX.service
+        EOF

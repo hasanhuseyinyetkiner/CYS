@@ -1,0 +1,286 @@
+﻿@model CYS.Models.Hayvan
+
+@{
+	ViewData["Title"] = "Ana Sayfa";
+}
+
+<div class="wrapper d-flex flex-column flex-row-fluid" id="kt_wrapper">
+	<!--begin::Header-->
+	<div id="kt_header" style="" class="header align-items-stretch">
+		@await Component.InvokeAsync("HeaderBrand")
+		<!--end::Brand-->
+		@await Component.InvokeAsync("PageHeader", new {pageHeader = "Yönetim Paneli", pageTitle = "Hayvan Yönetimi", current = "Hayvan Düzenle"})
+	</div>
+
+	<div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+		<!--begin::Post-->
+		<div class="post d-flex flex-column-fluid" id="kt_post">
+			<!--begin::Container-->
+			<div id="kt_content_container" class="container-xxl">
+
+				<div class="row g-5 g-xl-8">
+					<form class="form">
+						<div class="card-body">
+							<div class="fv-row mb-7">
+								<!--begin::Label-->
+								<label class="fw-bold fs-6 mb-2">Eid</label>
+								<!--end::Label-->
+								<!--begin::Input-->
+								<input type="text" name="user_name" id ="rfidTxt" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="RFID Okutun" value=@Model.rfidKodu />
+								<!--end::Input-->
+							</div>
+							<!--end::Input group-->
+							<div class="fv-row mb-7">
+								<!--begin::Label-->
+								<label class="fw-bold fs-6 mb-2">Ağırlık</label>
+								<!--end::Label-->
+								<!--begin::Input-->
+								<input type="text" name="user_email" id ="agirlikTxt" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Hayvan Ağırlık" value=@Model.agirlik />
+								<!--end::Input-->
+							</div>
+							<!--begin::Input group-->
+							<div class="fv-row mb-7">
+								<!--begin::Label-->
+								<label class="fw-bold fs-6 mb-2">İsim</label>
+								<!--end::Label-->
+								<!--begin::Input-->
+								<input type="text" name="user_email" id="hayvanTxt" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Hayvan İsmi" value='@Model.kupeIsmi' />
+								<!--end::Input-->
+							</div>
+
+							<div class="fv-row mb-7">
+								<label class="required fs-6 fw-bold mb-2">Tür Seçin</label>
+								<!--end::Label-->
+								<!--begin::Input-->
+								<select name="products" onchange="turSecim()" class="form-control  mb-3 mb-lg-0" id="lblTur" asp-items="@ViewBag.list">
+									<option value="-1" selected="selected">Bir Hayvan Türü Seçin</option>
+								</select>
+
+
+
+							</div>
+							<div class="fv-row mb-7">
+								<label class="required fs-6 fw-bold mb-2">Alt Tür Seçin</label>
+								<!--end::Label-->
+								<!--begin::Input-->
+								<select class="form-control  mb-3 mb-lg-0" id="lblaltTur" name="altTur"></select>
+
+
+							</div>
+
+							<div class="separator separator-dashed my-5"></div>
+
+							<div class="form-group">
+								<!--begin::Label-->
+								<label class="required fw-bold fs-6 mb-5">Cinsiyet</label>
+								<!--end::Label-->
+								<!--begin::Roles-->
+								<!--begin::Input row-->
+								<div class="d-flex fv-row">
+									<!--begin::Radio-->
+									<div class="form-check form-check-custom form-check-solid">
+										<!--begin::Input-->
+										<input class="form-check-input me-3" name="user_role"  type="radio" value="0" id="kt_modal_update_role_option_0" checked='checked' />
+										<!--end::Input-->
+										<!--begin::Label-->
+										<label class="form-check-label" for="kt_modal_update_role_option_0">
+											<div class="fw-bolder text-gray-800">Erkek</div>
+										</label>
+										<!--end::Label-->
+									</div>
+									<!--end::Radio-->
+								</div>
+								<!--end::Input row-->
+								<div class='separator separator-dashed my-5'></div>
+								<!--begin::Input row-->
+								<div class="d-flex fv-row">
+									<!--begin::Radio-->
+									<div class="form-check form-check-custom form-check-solid">
+										<!--begin::Input-->
+										<input class="form-check-input me-3" name="user_role" type="radio" value="1" id="kt_modal_update_role_option_1" />
+										<!--end::Input-->
+										<!--begin::Label-->
+										<label class="form-check-label" for="kt_modal_update_role_option_1">
+											<div class="fw-bolder text-gray-800">Dişi</div>
+										</label>
+										<!--end::Label-->
+									</div>
+									<!--end::Radio-->
+								</div>
+								<!--end::Input row-->
+								<div class='separator separator-dashed my-5'></div>
+								<!--begin::Input row-->
+								<div class="d-flex fv-row">
+									<!--begin::Radio-->
+									<div class="form-check form-check-custom form-check-solid">
+										<!--begin::Input-->
+										<input class="form-check-input me-3" name="user_role" type="radio" value="2" id="kt_modal_update_role_option_2" />
+										<!--end::Input-->
+										<!--begin::Label-->
+										<label class="form-check-label" for="kt_modal_update_role_option_2">
+											<div class="fw-bolder text-gray-800">Bilinmeyen</div>
+
+										</label>
+										<!--end::Label-->
+									</div>
+									<!--end::Radio-->
+								</div>
+								<!--end::Input row-->
+								<div class='separator separator-dashed my-5'></div>
+							</div>
+						</div>
+						<div class="card-footer">
+							<a href="javascript:hayvanDuzenlex()" class="btn btn-primary mr-2">Duzenle</a>
+							<button type="reset" class="btn btn-secondary">İptal</button>
+						</div>
+					</form>
+				</div>
+				<!--end::Row-->
+				<!--begin::Row-->
+				<!--end::Row-->
+			</div>
+			<!--end::Container-->
+		</div>
+		<!--end::Post-->
+	</div>
+
+	@await Component.InvokeAsync("Footer")
+</div>
+
+<script>
+	function hayvanDuzenlex() {
+		var rfid = document.getElementById("rfidTxt");
+		var agirlik = document.getElementById("agirlikTxt");
+		var hayvanAdi = document.getElementById("hayvanTxt");
+		var cinsiyet = document.getElementById("kt_modal_update_role_option_0");
+		var radioButtonGroup = document.getElementsByName("user_role");
+		var cinsiyetRadio = Array.from(radioButtonGroup).find(
+			(radio) => radio.checked
+		);
+		const selectElement = document.getElementById('lblaltTur');
+		// Get the selected option
+		const selectedOption = selectElement.options[selectElement.selectedIndex];
+		let kategoriId = -1;
+		if (selectedOption) {
+			 kategoriId = selectedOption.value;
+
+		}
+
+		// Get the ID and text content of the selected option
+		$.ajax({
+			url: "/Hayvan/HayvanDuzenleJson",
+			type: "POST",
+			data: {
+				"hayvanId": '@ViewBag.HayvanId', "rfid": rfid.value, "hayvanAdi": hayvanAdi.value, "cinsiyet": cinsiyetRadio.value, "agirlik": agirlik.value, "kategoriId" : kategoriId
+			},
+			success: function (returnData) {
+
+				if (returnData["status"] == "0" || returnData["status"] == "-1") {
+					Swal.fire({
+						text: returnData["message"],
+						icon: "error",
+						buttonsStyling: false,
+						confirmButtonText: "Tekrar Eklemeyi dene!",
+						customClass: {
+							confirmButton: "btn btn-primary"
+						}
+					});
+					window.location.href = "../../Hayvan/HayvanDuzenle?id=" + '@ViewBag.HayvanAdi';
+
+				}
+				else {
+					Swal.fire({
+						text: returnData["message"],
+						icon: "success",
+						buttonsStyling: false,
+						confirmButtonText: "Tekrar Eklemeyi dene!",
+						customClass: {
+							confirmButton: "btn btn-primary"
+						}
+					});
+					window.location.href = "../../Hayvan/HayvanListesi";
+				}
+			}
+		});
+	}
+
+
+	setInterval(function () {
+		rfidGetir();
+		agirlikGetir();
+	}, 1000);
+
+	function rfidGetir() {
+		var item = document.getElementById("rfidTxt");
+		$.ajax({
+			url: "/Hayvan/rfidDondur",
+			type: "POST",
+			async: true,
+			success: function (returnData) {
+
+				if (returnData["status"] == "0" || returnData["status"] == "-1") {
+
+
+				}
+				else {
+					item.value = returnData["status"];
+				}
+			}
+		});
+	}
+
+	function agirlikGetir() {
+
+		var item = document.getElementById("agirlikTxt");
+
+		$.ajax({
+			url: "/Hayvan/agirlikDondur",
+			type: "POST",
+			async: true,
+			success: function (returnData) {
+
+				if (returnData["status"] == "0" || returnData["status"] == "-1") {
+
+
+				}
+				else {
+					item.value = returnData["status"];
+				}
+			}
+		});
+	}
+
+	function turSecim() {
+		var e = document.getElementById("lblTur");
+		var item = document.getElementById("lblaltTur");
+		removeOptions(item);
+		$.ajax({
+			url: "/Hayvan/hayvanAltTurJson",
+			dataType: "json",
+			type: "POST",
+			data: {
+				"value": e.value
+			},
+			success: function (returnData) {
+				var gelen = JSON.parse(returnData);
+				for (let i = 0; i < gelen.length; i++) {
+					var opt = document.createElement("option");
+					opt.value = gelen[i].id;
+					opt.text = gelen[i].kategoriAdi; // whatever property it has
+					item.appendChild(opt);
+				}
+			}
+		});
+
+
+	}
+
+	function removeOptions(selectElement) {
+		var i, L = selectElement.options.length - 1;
+		for (i = L; i >= 0; i--) {
+			selectElement.remove(i);
+		}
+	}
+
+
+</script>

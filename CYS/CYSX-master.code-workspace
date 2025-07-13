@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../Merlab/ciftlikyonetim-main_furkan"
+		}
+	],
+	"settings": {
+		"powershell.cwd": "CYSX-master"
+	}
+}

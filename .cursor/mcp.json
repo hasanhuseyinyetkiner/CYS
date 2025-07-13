@@ -1,0 +1,139 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres.wahoyhkhwvetpopnopqa:[MErlab.2642]@aws-0-us-east-2.pooler.supabase.com:5432/postgres"
+      ]
+    },
+    "figma-developer-mcp": {
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "npx",
+        "figma-developer-mcp",
+        "--stdio",
+        "--figma-api-key=figd_8Ff3o2EtMZYarmMQPp1MugQSKL5PMFpYW9boF26k"
+      ]
+    },
+    "@smithery-ai-github": {
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@smithery-ai/github",
+        "--config",
+        "{\"githubPersonalAccessToken\":\"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\"}"
+      ]
+    },
+    "sequential-thinking": {
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "sequential-thinking",
+        "--config",
+        "{}"
+      ]
+    },
+    "mcp-webresearch": {
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@chuanmingliu/mcp-webresearch",
+        "--key",
+        "504fca86-2833-4b17-9d46-1ef41db93b87"
+      ]
+    },
+    "mcp_flutter": {
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@Arenukvern/mcp_flutter",
+        "--key",
+        "504fca86-2833-4b17-9d46-1ef41db93b87"
+      ]
+    },
+    "claude-code-mcp": {
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@auchenberg/claude-code-mcp",
+        "--key",
+        "504fca86-2833-4b17-9d46-1ef41db93b87"
+      ]
+    },
+    "think-mcp-server": {
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@PhillipRt/think-mcp-server",
+        "--key",
+        "504fca86-2833-4b17-9d46-1ef41db93b87"
+      ]
+    },
+    "servers": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "@smithery/cli@latest",
+      "run",
+      "@jlia0/servers",
+      "--key",
+      "504fca86-2833-4b17-9d46-1ef41db93b87",
+      "--profile",
+        "sure-slug-KJV5H4"
+    ]
+    },
+    "server-sequential-thinking": {
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@smithery-ai/server-sequential-thinking",
+        "--key",
+        "504fca86-2833-4b17-9d46-1ef41db93b87"
+      ]
+    },
+    "context7-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@upstash/context7-mcp",
+        "--key",
+        "504fca86-2833-4b17-9d46-1ef41db93b87"
+      ]
+    }
+  }
+}

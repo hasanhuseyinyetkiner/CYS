@@ -1,0 +1,48 @@
+﻿@model CYS.Models.konum
+<style>
+	/* Adjust the size of the map container */
+	#map {
+		width: 400px; /* Set the desired width */
+		height: 300px; /* Set the desired height */
+	}
+</style>
+<div class="wrapper d-flex flex-column flex-row-fluid" id="kt_wrapper">
+	<!--begin::Header-->
+	<div id="kt_header" style="" class="header align-items-stretch">
+	</div>
+
+	<div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+		<!--begin::Post-->
+		<div class="post d-flex flex-column-fluid" id="kt_post">
+			<!--begin::Container-->
+			<div id="kt_content_container" class="container-xxl">
+				<div id="map" style="height: 400px;"></div>
+
+				<script>
+					// JavaScript code for creating the map goes here
+					var lat = @Model.att; // Replace with your latitude
+					var lng = @Model.lang; // Replace with your longitude
+
+					var map = L.map('map').setView([lat, lng], 13); // Set the initial map center using lat and lng
+
+					L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+						attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+					}).addTo(map);
+
+					var marker = L.marker([lat, lng]).addTo(map); // Add a marker to the map at the specified lat and lng
+					marker.bindPopup("Hello, this is a Leaflet marker!").openPopup(); // Add a popup to the marker
+				</script>
+
+			</div>
+			<!--end::Container-->
+		</div>
+		<!--end::Post-->
+	</div>
+
+	@await Component.InvokeAsync("Footer")
+</div>
+
+<h1>Konum</h1>
+
+
+

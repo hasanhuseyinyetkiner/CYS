@@ -1,0 +1,267 @@
+﻿
+@{
+    ViewData["Title"] = "KantarAyari";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="wrapper d-flex flex-column flex-row-fluid" id="kt_wrapper">
+	<!--begin::Header-->
+	<div id="kt_header" style="" class="header align-items-stretch">
+		@await Component.InvokeAsync("HeaderBrand")
+		<!--end::Brand-->
+		@await Component.InvokeAsync("PageHeader", new {pageHeader = "Yönetim Paneli", pageTitle = "Kantar Ayarı", current = "Tare Ayarı"})
+	</div>
+
+	<div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+		<!--begin::Post-->
+		<div class="post d-flex flex-column-fluid" id="kt_post">
+			<!--begin::Container-->
+			<div id="kt_content_container" class="container-xxl">
+
+				<div class="row">
+					<!-- Form with beautiful textbox and button -->
+					<div action="col-md-3"></div>
+					<div action="col-md-6">
+						<form>
+							<div class="form-group">
+								<label for="exampleTextbox">İstek Bilgisi:</label>
+								<input type="text" class="form-control form-control-lg rounded" id="requestId" placeholder="requestId">
+							</div>
+							<div class="form-group">
+								<label for="exampleTextbox">Eşik Ağırlık Girin:</label>
+								<input type="text" class="form-control form-control-lg rounded" id="agirlikTXT" placeholder="KG cinsinden Ağırlık">
+							</div>
+							<div class="form-group">
+								<label for="exampleTextbox">Ölçülen Ağırlık</label>
+								<input type="text" class="form-control form-control-lg rounded" id="txtOlculen" placeholder="Ölçülen Ağırlık">
+							</div>
+							<br />
+							<button type="button" class="btn btn-primary" onclick="agirlikOlc();">Ağırlık Test</button>
+
+							<button type="button" class="btn btn-success" onclick="basla();">Tare Başlat</button>
+							<button type="button" class="btn btn-danger" onclick="agirlikGonder();">Ağırlık Gönder</button>
+
+						</form>
+
+					</div>
+
+					<div action="col-md-3"></div>
+
+				</div>
+				<!--end::Row-->
+				<!--begin::Row-->
+				<!--end::Row-->
+			</div>
+			<!--end::Container-->
+		</div>
+		<!--end::Post-->
+	</div>
+
+	@await Component.InvokeAsync("Footer")
+</div>
+
+
+
+<script>
+	let intervalId = -1; // Variable to store the interval ID
+	let Tare3 = 0;
+	let Tare4 = 0;
+	let Tare5 = 0;
+	let islemModu = -1;
+
+	let isRequesting = false;
+
+
+	function basla() {
+
+		setTimeout(() => {
+			islemModu = 51;
+			fetch("../../Tare/tareBaslat")
+				.then(response => response.text())
+				.then(guid => {
+					// Once the response is received, set the value of the input field with id "guidId"
+					document.getElementById("requestId").value = guid.replace(/"/g, '');
+					Tare3 = 0;
+					Tare4 = 0;
+					Tare5=0;
+					getOlcumContinuously(guid.replace(/"/g, ''));
+				})
+				.catch(error => {
+					// Handle any errors that might occur during the request
+					console.error("Error fetching GUID:", error);
+				});
+		}, 100); // Adjust the delay time as needed (in milliseconds)
+	}
+
+	function agirlikGonder() {
+		let agirlik = document.getElementById("agirlikTXT").value;
+		if(agirlik == "" )
+		{
+			alert("Ağırlık girin");
+			return;
+		}
+		$.ajax({
+			url: "../../Tare/agirlikGonder", // Replace with your actual API endpoint URL
+			method: "POST", // Use "POST" or "GET" depending on your API requirements
+			data: { agirlik: agirlik },
+			success: function (response) {
+				// Handle the successful response from the server, if needed
+				console.log("AJAX request successful:", response);
+			},
+			error: function (error) {
+				// Handle any errors that occur during the AJAX request
+				console.error("AJAX request error:", error);
+			}
+		});
+	}
+
+	function tareModuDegis(islem)
+	{
+		$.ajax({
+			url: "../../Tare/ModDegistir", // Replace with your actual API endpoint URL
+			method: "POST", // Use "POST" or "GET" depending on your API requirements
+			data: { islemModu: islem },
+			success: function (response) {
+				// Handle the successful response from the server, if needed
+				console.log("AJAX request successful:", response);
+			},
+			error: function (error) {
+				// Handle any errors that occur during the AJAX request
+				console.error("AJAX request error:", error);
+			}
+		});
+
+	}
+
+	function agirlikOlc()
+	{
+		
+		let mevcutguid = document.getElementById("requestId").value;
+		if(mevcutguid == "")
+		{
+			Toast("Önce Tare İşlemi Başlatın",2);
+
+			return;
+		}
+
+		// Delay the execution of the function for 2000 milliseconds (2 seconds)
+		setTimeout(function () {
+		}, 1500);
+		  
+		setTimeout(() => {
+			fetch("../../Tare/enSonAgirlik")
+				.then(response => response.text())
+				.then(guid => {
+					if (guid.replace(/"/g, '') != "") {
+						Toast("Ölçülen Ağırlık: " + guid.replace(/"/g, '') + " KG");
+						document.getElementById("txtOlculen").value = guid.replace(/"/g, '');
+						
+
+					}
+					else
+					{
+						document.getElementById("txtOlculen").value = "";
+						
+
+					}
+				})
+				.catch(error => {
+					// Handle any errors that might occur during the request
+					console.error("Error fetching GUID:", error);
+				});
+		}, 100); // Adjust the delay time as needed (in milliseconds)
+
+
+
+
+	}
+	function getOlcumContinuously(requestId) {
+
+		// Function to make the AJAX request and handle the response
+		function makeRequest() {
+
+			fetch('/Tare/MevcutTare')
+				.then((response) => response.json())
+				.then((data) => {
+					// Check if the response is not an empty string
+					if (data !== "") {
+						// Parse the JSON data received from the server
+						const parsedData = JSON.parse(data);
+						if (parsedData.tare3 == 1 && Tare3 == 0) {
+							Tare3 = 1;
+							// Show toast notification for hayvan giriş
+							Toast("Tare Alındı. Ağırlık Girip Göndermeniz gerekmektedir");
+							return;
+						}
+						if (parsedData.tare4 == 1 && Tare4 == 0) {
+							Tare4 = 1;
+							// Show toast notification for hayvan çıkış
+							Toast("İşlem Sonlandı");
+							clearInterval(intervalId);
+						}
+
+						if (parsedData.tare5 == 1 && Tare5 == 0) {
+							Tare5 = 1;
+							// Show toast notification for hayvan çıkış
+							Toast("Eşik Ağırlık Yollanıyor");
+							islemModu = 52;
+						}
+						
+					} else {
+
+						clearAllTextFields();
+						isRequesting = false;
+						return;
+					}
+				})
+				.catch((error) => {
+					// Handle any errors that might occur during the request
+					console.error("Error during request:", error);
+					isRequesting = false;
+					return;
+				});
+		}
+
+		// Make the initial request immediately
+		makeRequest();
+
+		// Set the interval to make continuous requests every 5 seconds (you can adjust the interval as needed)
+		intervalId = setInterval(makeRequest, 500);
+
+		// Optional: If you want to stop the continuous requests after a certain time (e.g., 1 minute), you can use setTimeout
+		// Uncomment the following lines if you need to stop the requests after a specific duration
+		// setTimeout(() => {
+		//   clearInterval(intervalId); // Stop the continuous requests
+		// }, 60000); // Stop after 1 minute (adjust the duration as needed)
+	}
+
+	// Define a custom Toast function using Bootstrap's toast component
+	function Toast(message, type = 1) {
+		// Set the options that I want
+		toastr.options = {
+			"closeButton": true,
+			"newestOnTop": false,
+			"progressBar": true,
+			"positionClass": "toast-top-right",
+			"preventDuplicates": false,
+			"onclick": null,
+			"showDuration": "300",
+			"hideDuration": "1000",
+			"timeOut": "5000",
+			"extendedTimeOut": "1000",
+			"showEasing": "swing",
+			"hideEasing": "linear",
+			"showMethod": "fadeIn",
+			"hideMethod": "fadeOut"
+		}
+		if(type == 1)
+			toastr.success(message);
+		else if(type == 2)
+			toastr.error(message);
+		else if(type == 3)
+			toastr.warning(message);
+
+
+
+	}
+
+</script>

@@ -1,0 +1,164 @@
+﻿<style>
+	.text-success {
+		color: #28a745;
+	}
+
+	.text-danger {
+		color: #dc3545;
+	}
+
+	.fw-bolder {
+		font-weight: bold;
+	}
+
+</style>
+<div class="modal fade" id="kt_modal_add_user_agirlik" tabindex="-1" aria-hidden="true">
+	<!--begin::Modal dialog-->
+	<div class="modal-dialog modal-dialog-centered mw-650px">
+		<!--begin::Modal content-->
+		<div class="modal-content">
+			<!--begin::Modal header-->
+			<div class="modal-header" id="kt_modal_add_user_header">
+				<!--begin::Modal title-->
+				<h2 class="fw-bolder">Hayvan Ağırlık Geçmişi</h2>
+				<!--end::Modal title-->
+				<!--begin::Close-->
+				<div class="btn btn-icon btn-sm btn-active-icon-primary" data-kt-users-modal-action="close">
+					<!--begin::Svg Icon | path: icons/duotune/arrows/arr061.svg-->
+					<span class="svg-icon svg-icon-1">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+							<rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="black" />
+							<rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="black" />
+						</svg>
+					</span>
+					<!--end::Svg Icon-->
+				</div>
+				<!--end::Close-->
+			</div>
+			<!--end::Modal header-->
+			<!--begin::Modal body-->
+			<div class="modal-body scroll-y mx-5 mx-xl-15 my-7">
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>Ağırlık (kg)</th>
+							<th>Tarih</th>
+							<th>Ortalama Fark</th>
+						</tr>
+					</thead>
+					<tbody id="agirlikTabloBody">
+						<!-- AJAX ile doldurulacak -->
+					</tbody>
+				</table>
+			</div>
+
+			<!--end::Modal body-->
+		</div>
+		<!--end::Modal content-->
+	</div>
+	<!--end::Modal dialog-->
+</div>
+
+<script>
+	function hayvanagirliklariGetir(hayvanId) {
+		hayvanId = document.getElementById("idHayvan").value;
+
+		$.ajax({
+			url: '/api/AgirlikApi/hayvanAgirlikGecmisi/' + hayvanId,
+			method: 'GET',
+			success: function (data) {
+				var agirliklar = data.agirliklar;
+				var enYuksekAgirlik = data.enYuksekAgirlik;
+				var ortalamaFark = data.ortalamaFark;
+
+				var tableContent = '';
+				agirliklar.forEach(function (item, index) {
+					tableContent += `<tr>
+						<td>${item.agirlikId} kg</td>
+						<td>${new Date(item.tarih).toLocaleDateString()}</td>
+						<td>${(Math.random() * 20 - 10).toFixed(2)} kg</td>
+					</tr>`;
+				});
+
+				tableContent += `<tr class="fw-bolder">
+					<td colspan="2">En Yüksek Ağırlık</td>
+					<td>${enYuksekAgirlik} kg</td>
+				</tr>`;
+
+				tableContent += `<tr class="fw-bolder">
+					<td colspan="2">Benzer türdeki hayvanlardan fark</td>
+					<td>
+						<span class="${ortalamaFark >= 0 ? 'text-success' : 'text-danger'}">
+							${ortalamaFark >= 0 ? '+' : ''}${ortalamaFark} kg
+						</span>
+					</td>
+				</tr>`;
+
+				$('#agirlikTabloBody').html(tableContent);
+				$('#kt_modal_add_user_agirlik').modal('show');
+			}
+		});
+	}
+
+</script>
+@* <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+</script>
+<script>
+
+	
+</script>
+<script>
+	function hayvanagirliklariGetir()
+	{
+		let hayvanid = document.getElementById("idHayvan").value;
+
+	$.ajax({
+		url: "/Hayvan/agirlikHayvanListesi",
+		dataType: "json",
+		type: "POST",
+		async: false,
+		data: {
+			"hayvanId": parseInt(hayvanid)
+		},
+		success: function (returnData) {
+			var obj = JSON.parse(returnData);
+			if (returnData != "") {
+					const xValues = [obj.length];
+					const xData = [obj.length];
+					const normalAralik = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+				for(let i = 0; i < obj.length; i++)
+				{
+						xValues[i] = obj[i].tarih;
+						xData[i] = obj[i].agirlikId;
+				}
+					new Chart("myChart", {
+						type: "line",
+						data: {
+							labels: xValues,
+							datasets: [{
+								label: "Mevcut Hayvan",
+								data: xData,
+								borderColor: "green",
+								fill: false
+							},
+							{
+								label: "Ortalama",
+								data: normalAralik,
+								borderColor: "red",
+								fill: true
+							}
+							
+							],
+						},
+						options: {
+							legend: { display: false }
+						}
+					});
+			}
+			
+
+		}
+	});
+	}
+	
+</script> *@

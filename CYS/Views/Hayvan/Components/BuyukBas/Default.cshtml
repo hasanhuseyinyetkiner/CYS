@@ -1,0 +1,356 @@
+﻿
+<div class="modal fade" id="kt_modal_add_user" tabindex="-1" aria-hidden="true">
+	<!--begin::Modal dialog-->
+	<div class="modal-dialog modal-dialog-centered mw-650px">
+		<!--begin::Modal content-->
+		<div class="modal-content">
+			<!--begin::Modal header-->
+			<div class="modal-header" id="kt_modal_add_user_header">
+				<!--begin::Modal title-->
+				<h2 class="fw-bolder">Büyük Baş kontrol</h2>
+				<!--end::Modal title-->
+				<!--begin::Close-->
+				<div class="btn btn-icon btn-sm btn-active-icon-primary" data-kt-users-modal-action="close">
+					<!--begin::Svg Icon | path: icons/duotune/arrows/arr061.svg-->
+					<span class="svg-icon svg-icon-1">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+							<rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="black" />
+							<rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="black" />
+						</svg>
+					</span>
+					<!--end::Svg Icon-->
+				</div>
+				<!--end::Close-->
+			</div>
+			<!--end::Modal header-->
+			<!--begin::Modal body-->
+			<div class="modal-body scroll-y mx-5 mx-xl-15 my-7">
+				<!--begin::Form-->
+				<form id="kt_modal_add_user_form" class="form" action="#">
+					<!--begin::Scroll-->
+					<div class="d-flex flex-column scroll-y me-n7 pe-7" id="kt_modal_add_user_scroll" data-kt-scroll="true" data-kt-scroll-activate="{default: false, lg: true}" data-kt-scroll-max-height="auto" data-kt-scroll-dependencies="#kt_modal_add_user_header" data-kt-scroll-wrappers="#kt_modal_add_user_scroll" data-kt-scroll-offset="300px">
+						<!--begin::Input group-->
+						<!--end::Input group-->
+						<div class="fv-row mb-4 row">
+							<label class="required fw-bold fs-6 mb-2">İstek Id</label>
+
+							<input class="form-control form-control-solid mb-3 mb-lg-0" type="text" name="guidName" id="guidId" value="" />
+							<!--end::Input-->
+						</div>
+						<div class="fv-row mb-4 row">
+							<input type="button" onclick="basla()" id="btnBasla" class="form-control  mb-3  btn btn-success" value="Otomatik Süreç" />
+							<!--end::Input-->
+						</div>
+						<div class="fv-row mb-4 row">
+							<div class="col-12">
+								<!--begin::Label-->
+								<label class="required fw-bold fs-6 mb-2">Eid</label>
+								<!--end::Label-->
+								<!--begin::Input-->
+								<input type="text" name="user_name" id="rfidTxt" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="RFID Okutun" />
+								<label class="fw-bold fs-6 mb-2" id="tarihlbl"></label>
+							</div>
+
+
+							<!--end::Input-->
+						</div>
+
+						<!--begin::Input group-->
+						<div class="fv-row mb-4 row">
+							<div class="col-6">
+								<!--begin::Label-->
+								<label class="required fw-bold fs-6 mb-2">İlk Ağırlık</label>
+								<!--end::Label-->
+								<!--begin::Input-->
+								<input type="text" name="agirlik-name" id="ilkAgirlikTxt" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="İlk Ağırlık" />
+								<label class="fw-bold fs-6 mb-2" id="tarihlbl"></label>
+							</div>
+							<div class="col-6">
+								<label class="required fw-bold fs-6 mb-2">Son Ağırlık</label>
+								<!--end::Label-->
+								<!--begin::Input-->
+								<input type="text" name="agirlik-name" id="sonAgirlikTxt" class="form-control form-control-solid mb-3 mb-lg-0" placeholder="Son Ağırlık" />
+								<label class="fw-bold fs-6 mb-2" id="tarihlbl"></label>
+
+							</div>
+							<!--end::Input-->
+						</div>
+
+
+
+
+
+						<div class="fv-row mb-4 row">
+							<div class="col-12">
+
+								<input type="button" onclick="iptalEt();" class="form-control  mb-3  btn btn-danger" value="Otomatik Süreç İptal" />
+							</div>
+
+
+
+							<!--end::Input-->
+						</div>
+
+					
+						<!--end::Input group-->
+						<!--begin::Input group-->
+					
+						<!--end::Input group-->
+						<!--begin::Input group-->
+						<!--end::Input group-->
+					</div>
+					<!--end::Scroll-->
+					<!--begin::Actions-->
+					<div class="text-center pt-15">
+						<button type="reset" class="btn btn-light me-3" data-kt-users-modal-action="cancel">Temizle</button>
+						<button type="submit" class="btn btn-primary" data-kt-users-modal-action="submit">
+							<span class="indicator-label" id="btnIdd">Ekle</span>
+							<span class="indicator-progress">
+								Lütfen Bekleyin
+								<span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+							</span>
+						</button>
+					</div>
+					<!--end::Actions-->
+				</form>
+				<!--end::Form-->
+			</div>
+			<!--end::Modal body-->
+		</div>
+		<!--end::Modal content-->
+	</div>
+	<!--end::Modal dialog-->
+</div>
+
+
+<script>
+	let intervalId =-1; // Variable to store the interval ID
+	let iptal = 0;
+	let guidx = ""
+	let islemSonucu = 1;
+
+	let rfid = "";
+	let ilkagirlik = "";
+	let sonagirlik = "";
+	let hayvanui = 0;
+	let kupe = 0;
+	let hayvangirdi = 0;
+	let hayvancikti = 0;
+	let ilkmi = 1;
+
+	let isRequesting = false;
+
+
+	function basla() {
+		clearAllTextFields();
+		if(intervalId != -1 && iptal == 0)
+		{
+			clearInterval(intervalId);
+		}
+
+		setTimeout(() => {
+			fetch("/api/BuyukBas")
+				.then(response => response.text())
+				.then(guid => {
+					// Once the response is received, set the value of the input field with id "guidId"
+					document.getElementById("guidId").value = guid;
+					hayvangirdi = 0;
+					hayvancikti = 0;
+					kupe = 0;
+					ilkagirlik = 0;
+					sonagirlik = 0;
+
+					isRequesting = false;
+					getOlcumContinuously(guid);
+				})
+				.catch(error => {
+					// Handle any errors that might occur during the request
+					console.error("Error fetching GUID:", error);
+				});
+		}, 500); // Adjust the delay time as needed (in milliseconds)
+	}
+
+	function iptalEt() {
+		clearInterval(intervalId);
+		clearAllTextFields();
+		// Make the AJAX request to the /BuyukBasIslem/iptalEt endpoint
+		fetch("/BuyukBasIslem/iptalEt")
+			.then(response => response.json())
+			.then(data => {
+				// If the response is successful and returns "1" as JSON
+				if (data === "1") {
+					// Close the modal using Bootstrap's modal method
+					const modalElement = document.getElementById("kt_modal_add_user");
+					const bootstrapModal = new bootstrap.Modal(modalElement);
+					bootstrapModal.hide();
+
+					// You can perform any additional actions here after a successful request
+					console.log("Request was successful. Modal closed.");
+					return 1;
+
+				} else {
+					// Handle the case if the response is not as expected
+					console.error("Unexpected response:", data);
+					return 2;
+
+				}
+			})
+			.catch(error => {
+				// Handle any errors that might occur during the request
+				console.error("Error during request:", error);
+			});
+		location.reload();
+	}
+
+	function safeIptal()
+	{
+		hayvangirdi = 0;
+		hayvancikti = 0;
+		kupe = 0;
+		clearInterval(intervalId);
+		basla();
+	}
+
+	// Assuming you have a `Toast` function that displays toast notifications
+
+	function getOlcumContinuously(requestId) {
+
+		// Function to make the AJAX request and handle the response
+		function makeRequest() {
+
+			fetch(`/BuyukBasIslem/olcum?requestId=${requestId}`)
+				.then((response) => response.json())
+				.then((data) => {
+					// Check if the response is not an empty string
+					if (data !== "") {
+						// Parse the JSON data received from the server
+						const parsedData = JSON.parse(data);
+						if (parsedData.hayvangirdi == 1 && hayvangirdi == 0) {
+							hayvangirdi = 1;
+							// Show toast notification for hayvan giriş
+							Toast("Hayvan giriş yaptı");
+							isRequesting = false;
+							return;
+						}
+						if (parsedData.hayvancikti == 1 && hayvancikti == 0) {
+							hayvancikti = 1;			
+							// Show toast notification for hayvan çıkış
+							Toast("Hayvan çıkış yaptı, 2 saniye bekleyin...");
+							isRequesting = false;
+							basla();
+							
+						}
+						if(parsedData.hayvan != null )
+						{
+							if(kupe == 0)
+							{
+								kupe = 1;
+								document.getElementById("rfidTxt").value = parsedData.hayvan.rfidKodu;
+								Toast("Küpe Okundu");
+								isRequesting = false;
+								return;
+
+							}
+						}
+						if (parsedData.hayvanui == 1 && hayvanui == 0) {
+							hayvanui = 1;
+							Toast("yeni hayvan kaydedildi");
+							isRequesting = false;
+							return;
+						}
+						if (parsedData.hayvanui == 2 && hayvanui == 0) {
+							hayvanui = 1;
+							Toast("Var olan Hayvan Güncellendi");
+							isRequesting = false;
+							return;
+						}
+						if (parsedData.ilkOlcum !== "-1" && ilkagirlik == 0) {
+							Toast("Hayvanın ilk Ağırlığı " + parsedData.ilkOlcum + " KG olarak ölçüldü");
+							document.getElementById("ilkAgirlikTxt").value = parsedData.ilkOlcum;
+							ilkagirlik = 1;
+							isRequesting = false;
+							return;
+						}
+						if (parsedData.sonOlcum !== "-1" && sonagirlik == 0) {
+							Toast("Hayvanın son Ağırlığı " + parsedData.sonOlcum + " KG olarak ölçüldü." );
+
+							sonagirlik = 1;
+							document.getElementById("sonAgirlikTxt").value = parsedData.sonOlcum;
+
+							setTimeout(function () {
+							}, 1000);
+							Toast("Hayvanın Çıkması Bekleniyor");
+
+							isRequesting = false;
+							return;
+							//clearInterval(intervalId);
+						}
+
+						// Perform any actions with the parsed data here
+						console.log("Received data:", parsedData);
+					} else {
+
+						clearAllTextFields();
+						isRequesting = false;
+						return;
+					}
+				})
+				.catch((error) => {
+					// Handle any errors that might occur during the request
+					console.error("Error during request:", error);
+					isRequesting = false;
+					return;
+				});
+		}
+
+		// Make the initial request immediately
+		makeRequest();
+
+		// Set the interval to make continuous requests every 5 seconds (you can adjust the interval as needed)
+		intervalId = setInterval(makeRequest, 500);
+
+		// Optional: If you want to stop the continuous requests after a certain time (e.g., 1 minute), you can use setTimeout
+		// Uncomment the following lines if you need to stop the requests after a specific duration
+		// setTimeout(() => {
+		//   clearInterval(intervalId); // Stop the continuous requests
+		// }, 60000); // Stop after 1 minute (adjust the duration as needed)
+	}
+
+	function clearAllTextFields() {
+		document.getElementById("rfidTxt").value = "";
+		document.getElementById("ilkAgirlikTxt").value = "";
+		document.getElementById("sonAgirlikTxt").value = "";
+
+		rfid = "";
+		ilkagirlik = "";
+		sonagirlik = "";
+	}
+
+	// Define a custom Toast function using Bootstrap's toast component
+	function Toast(message) {
+		// Set the options that I want
+		toastr.options = {
+			"closeButton": true,
+			"newestOnTop": false,
+			"progressBar": true,
+			"positionClass": "toast-top-center",
+			"preventDuplicates": false,
+			"onclick": null,
+			"showDuration": "300",
+			"hideDuration": "1000",
+			"timeOut": "5000",
+			"extendedTimeOut": "1000",
+			"showEasing": "swing",
+			"hideEasing": "linear",
+			"showMethod": "fadeIn",
+			"hideMethod": "fadeOut"
+		}
+
+		toastr.success(message);
+
+	}
+
+</script>
+
+
+

@@ -1,0 +1,76 @@
+CYSX UYGULAMASI DAĞITIM TALİMATLARI
+
+1. Yerel makinedeki dosyaları sunucuya aktarma:
+   (Yerel makinede aşağıdaki komutları çalıştırın)
+
+   # Gerekli dosyaları sunucuya kopyalama
+   scp cys-publish.zip create_tables.sql fix_database.sql deploy.sh root@82.25.101.117:/root/
+
+2. Sunucuda kurulum işlemini gerçekleştirme:
+   (Sunucuya SSH ile bağlanın)
+
+   ssh root@82.25.101.117
+   
+   # Betik dosyasını çalıştırılabilir yapma
+   chmod +x /root/deploy.sh
+   
+   # Kurulum betiğini çalıştırma
+   cd /root && ./deploy.sh
+
+3. Kurulum sonrası kontroller:
+
+   # Servisin çalıştığından emin olma
+   systemctl status cysx
+   
+   # Uygulamanın çalıştığını kontrol etme (varsayılan port: 5000)
+   curl http://localhost:5000
+   
+   # Uygulama açılış sayfasına web tarayıcı üzerinden erişme
+   http://82.25.101.117:5000
+   
+4. Sorun Giderme:
+
+   # Servis log kayıtlarını inceleme
+   journalctl -u cysx
+   
+   # Uygulama log kayıtlarını inceleme
+   tail -f /var/log/syslog | grep cysx
+   
+   # Veritabanı bağlantısını test etme
+   mysql -u cysuser -p123456 -e "SHOW TABLES;" CYS
+
+5. Güvenlik Notları:
+
+   # Uygulamayı internet üzerinden erişime açmak için:
+   # 1. Firewall'da 5000 portunu açın:
+   ufw allow 5000/tcp
+   
+   # 2. Nginx ile reverse proxy yapılandırması (opsiyonel, daha güvenli erişim için):
+   apt install nginx
+   
+   # Nginx yapılandırması oluşturun:
+   nano /etc/nginx/sites-available/cysx
+   
+   # Aşağıdaki içeriği ekleyin:
+   server {
+       listen 80;
+       server_name 82.25.101.117;
+       
+       location / {
+           proxy_pass http://localhost:5000;
+           proxy_http_version 1.1;
+           proxy_set_header Upgrade $http_upgrade;
+           proxy_set_header Connection keep-alive;
+           proxy_set_header Host $host;
+           proxy_cache_bypass $http_upgrade;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Proto $scheme;
+       }
+   }
+   
+   # Yapılandırmayı etkinleştirin ve Nginx'i yeniden başlatın:
+   ln -s /etc/nginx/sites-available/cysx /etc/nginx/sites-enabled/
+   nginx -t
+   systemctl restart nginx
+   
+   # Bu durumda uygulamaya http://82.25.101.117 adresinden erişebilirsiniz. 

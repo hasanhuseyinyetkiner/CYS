@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MobilOlcum API Test Client</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 300px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            background-color: #f9f9f9;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>MobilOlcum API Test Client</h1>
+    
+    <div>
+        <button onclick="getAllData()">Tüm Verileri Getir</button>
+        <button onclick="getDiagnostics()">Diagnostik Bilgileri Getir</button>
+        <button onclick="createSampleData()">Örnek Veri Oluştur</button>
+        <button onclick="getLast20Data()">Son 20 Kaydı Getir</button>
+    </div>
+    
+    <div id="result">Sonuçlar burada görüntülenecek...</div>
+    
+    <script>
+        const baseUrl = 'http://localhost:5050/api/MobilOlcum';
+        
+        async function sendRequest(url) {
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                displayResult(data);
+                return data;
+            } catch (error) {
+                displayError(`İstek hatası: ${error.message}`);
+                return null;
+            }
+        }
+        
+        function displayResult(data) {
+            const resultElement = document.getElementById('result');
+            resultElement.innerHTML = '<span class="success">✅ Veri başarıyla alındı</span>\n\n';
+            resultElement.innerHTML += JSON.stringify(data, null, 2);
+        }
+        
+        function displayError(message) {
+            const resultElement = document.getElementById('result');
+            resultElement.innerHTML = `<span class="error">❌ ${message}</span>`;
+        }
+        
+        async function getAllData() {
+            await sendRequest(baseUrl);
+        }
+        
+        async function getDiagnostics() {
+            await sendRequest(`${baseUrl}/diagnostics`);
+        }
+        
+        async function createSampleData() {
+            await sendRequest(`${baseUrl}/createSampleData`);
+        }
+        
+        async function getLast20Data() {
+            await sendRequest(`${baseUrl}/GetLast20`);
+        }
+    </script>
+</body>
+</html> 

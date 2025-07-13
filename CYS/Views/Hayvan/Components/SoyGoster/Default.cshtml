@@ -1,0 +1,81 @@
+﻿<div class="modal top fade"
+     id="soyModal"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true"
+     data-mdb-backdrop="true"
+     data-mdb-keyboard="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Soy ağacı</h5>
+                <button type="button" class="btn-close" data-mdb-dismiss="modal" onclick="modalKapa();" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <script src="https://balkan.app/js/OrgChart.js"></script>
+                <div class="loader"></div>
+
+                <div id="tree">
+
+                </div>
+            </div>
+            <div hidden>
+                <input type="text" id="hyvnId" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="modalKapa();" class="btn btn-secondary" data-mdb-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.onshow = function () {
+        var chart = new OrgChart(document.getElementById("tree"), {
+            nodeBinding: {
+
+                field_0: "HayvanTur",
+                field_1: "AltTur",
+                field_2: "RFIDKodu",
+                field_3: "Agirlik",
+                img_0: "img",
+            }
+        });
+        var gelen;
+        $.ajax({
+            url: "/Hayvan/hayvanAkraba",
+            dataType: "json",
+            type: "POST",
+            data: {
+                "hayvanId": document.getElementById("hyvnId").value
+            },
+            success: function (returnData) {
+                
+                gelen = JSON.parse(returnData);
+
+                chart.on('init', function (sender) {
+                    setTimeout(function () {
+
+                        document.querySelector('.loader').style.display = 'none';
+                    }, 200);
+                });
+                chart.load(returnData);
+              
+            }
+        });
+
+
+
+
+     
+    };
+
+
+    function modalKapa()
+    {
+        $("#soyModal").modal('hide');
+
+    }
+</script>

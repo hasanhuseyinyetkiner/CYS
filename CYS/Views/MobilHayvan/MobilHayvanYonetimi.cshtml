@@ -1,0 +1,76 @@
+﻿@model List<CYS.Models.Hayvan>
+@{
+    ViewData["Title"] = "Ana Sayfa";
+}
+<div class="wrapper d-flex flex-column flex-row-fluid" id="kt_wrapper">
+    <!--begin::Header-->
+    <div id="kt_header" style="" class="header align-items-stretch">
+        @await Component.InvokeAsync("HeaderBrand")
+        <!--end::Brand-->
+        @await Component.InvokeAsync("PageHeader", new { pageHeader = "Yönetim Paneli", pageTitle = "Hayvan", current = "Hayvan Listesi" })
+    </div>    <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Son 20 Mobil Ölçüm</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle text-center">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>RFID Kodu</th>
+                                <th>Ağırlık</th>
+                                <th>Amaç</th>
+
+                                <th>Tarih</th>
+                                <th>Cinsiyet</th>
+                                <th>Kategori</th>
+                                <th>Küpe İsmi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mobilOlcumTableBody">
+                            <!-- Dinamik veriler buraya gelecek -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    @await Component.InvokeAsync("Footer")
+</div>
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            function loadMobilOlcumData() {
+                $.ajax({
+                    url: '/api/MobilOlcum/GetLast20',
+                    type: 'GET',
+                    success: function (data) {
+                        let tableBody = $('#mobilOlcumTableBody');
+                        tableBody.empty();
+                        $.each(data, function (index, olcum) {
+                            let row = `
+                                        <tr>
+                                            <td>${index + 1}</td>
+                                            <td>${olcum.rfid}</td>
+                                            <td>${olcum.weight} kg</td>
+                                                    <td>${olcum.amac}</td>
+                                            <td>${new Date(olcum.tarih).toLocaleString()}</td>
+                                            <td>${olcum.hayvan ? olcum.hayvan.cinsiyet : 'N/A'}</td>
+                                            <td>${olcum.hayvan && olcum.hayvan.kategori ? olcum.hayvan.kategori.kategoriAdi : 'N/A'}</td>
+                                            <td>${olcum.hayvan ? olcum.hayvan.kupeIsmi : 'N/A'}</td>
+                                        </tr>`;
+                            tableBody.append(row);
+                        });
+                    },
+                    error: function () {
+                        console.log('Veri çekme hatası.');
+                    }
+                });
+            }
+            loadMobilOlcumData();
+            setInterval(loadMobilOlcumData, 2000);
+        });
+    </script>
+}
