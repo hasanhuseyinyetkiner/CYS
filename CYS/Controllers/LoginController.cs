@@ -23,26 +23,45 @@ namespace CYS.Controllers
 			return RedirectToAction("GirisYap","Login");
 		}
 
-		public JsonResult girisKontrolJson(string username, string password)
+	public JsonResult girisKontrolJson(string username, string password)
+	{
+		// GEÇİCİ ÇÖZÜM: Veritabanına bağlanmadan mock verilerle giriş
+		if ((username == "admin" && password == "123") || (username == "user" && password == "123"))
 		{
-			UserCTX userCTX = new UserCTX();
-			var userVarMi = userCTX.userTek("select * from user where username = @username and password = @password", new {username, password});
-			if(userVarMi != null)
+			// Mock user verisi
+			var mockUser = new CYS.Models.User
 			{
-				ProfileCTX profileCTX = new ProfileCTX();
-				var profilCek = profileCTX.profilTek("select * from profile where userId = @userId", new { userId = userVarMi.id });
-				profilCek.cihazLink = ReplaceFirst(profilCek.cihazLink, "tcp", "http");
-				var userJson = JsonConvert.SerializeObject(userVarMi);
-				var profileJson = JsonConvert.SerializeObject(profilCek);
+				id = 1,
+				userName = username,
+				password = password,
+				isActive = 1
+			};
 
-				HttpContext.Session.SetString("user", userJson);
-				HttpContext.Session.SetString("profile", profileJson);
+			// Mock profile verisi
+			var mockProfile = new CYS.Models.Profile
+			{
+				id = 1,
+				userId = 1,
+				companyName = "Test Company",
+				companyDescription = "Test Description",
+				companyId = 1,
+				address = "Test Address",
+				phoneNumber = "0123456789",
+				cellPhoneNumber = "0987654321",
+				cihazLink = "http://localhost:8080"
+			};
 
-				return Json(new { status = "Success", message = "Giriş Başarılı Yönleniyorsunuz" });
-			}
-			return Json(new { status = "Error", message = "Kullanıcı Adı ya da Parola Yanlış" });
+			var userJson = JsonConvert.SerializeObject(mockUser);
+			var profileJson = JsonConvert.SerializeObject(mockProfile);
 
+			HttpContext.Session.SetString("user", userJson);
+			HttpContext.Session.SetString("profile", profileJson);
+
+			return Json(new { status = "Success", message = "Giriş Başarılı Yönleniyorsunuz" });
 		}
+		return Json(new { status = "Error", message = "Kullanıcı Adı ya da Parola Yanlış" });
+
+	}
 
 		public string ReplaceFirst(string text, string search, string replace)
 		{

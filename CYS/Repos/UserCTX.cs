@@ -8,7 +8,7 @@ namespace CYS.Repos
 	{
 		public List<User> userList(string sorgu, object param)
 		{
-			using (var connection = new MySqlConnection("Server=localhost;Database=CYS;User Id=root;Password=Merlab.702642;"))
+			using (var connection = new MySqlConnection("Server=localhost;Database=CYS;User Id=root;Password=;"))
 			{
 				var list = connection.Query<User>(sorgu, param).ToList();
 				return list;
@@ -17,7 +17,7 @@ namespace CYS.Repos
 
 		public User userTek(string sorgu, object param)
 		{
-			using (var connection = new MySqlConnection("Server=localhost;Database=CYS;User Id=root;Password=Merlab.702642;"))
+			using (var connection = new MySqlConnection("Server=localhost;Database=CYS;User Id=root;Password=;"))
 			{
 				var item = connection.Query<User>(sorgu, param).FirstOrDefault();
 				return item;
@@ -26,7 +26,7 @@ namespace CYS.Repos
 
 		public int userEkle(Profile profil)
 		{
-			using (var connection = new MySqlConnection("Server=localhost;Database=CYS;User Id=root;Password=Merlab.702642;"))
+			using (var connection = new MySqlConnection("Server=localhost;Database=CYS;User Id=root;Password=;"))
 			{
 				var item = connection.Execute("insert into user (username, password) values (@userName, @password)", profil);
 				return item;
@@ -35,7 +35,7 @@ namespace CYS.Repos
 
 		public int userGuncelle(Profile profil)
 		{
-			using (var connection = new MySqlConnection("Server=localhost;Database=CYS;User Id=root;Password=Merlab.702642;"))
+			using (var connection = new MySqlConnection("Server=localhost;Database=CYS;User Id=root;Password=;"))
 			{
 				var item = connection.Execute("update user set username = @username, password = @password where id = @id", profil);
 				return item;
