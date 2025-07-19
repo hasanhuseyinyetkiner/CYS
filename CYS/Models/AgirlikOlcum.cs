@@ -7,7 +7,7 @@ namespace CYS.Models
 		public int id { get; set; }
 		public int hayvanId { get; set; }
 		public double agirlik { get; set; }
-		public DateTime olcumTarihi { get; set; }
+		public DateTime olcumTarihi { get; set; } = DateTime.Now;
 		public bool bluetoothOlcum { get; set; }
 		public int userId { get; set; }
 		public string? olcumNotu { get; set; }
@@ -22,7 +22,13 @@ namespace CYS.Models
 		public User? user { get; set; }
 		
 		// Properties for ApplicationDbContext
-		public DateTime OlcumTarihi => olcumTarihi;
+		public DateTime OlcumTarihi { get; set; }
 		public virtual Animal? Hayvan { get; set; }
+        
+		// Ensure OlcumTarihi is initialized when the object is created
+		public AgirlikOlcum()
+		{
+			OlcumTarihi = olcumTarihi;
+		}
 	}
 }

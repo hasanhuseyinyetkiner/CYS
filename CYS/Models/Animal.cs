@@ -30,7 +30,7 @@ namespace CYS.Models
         public string TagNumber => kupeIsmi;
         
         // Properties for ApplicationDbContext - Navigation properties
-        public string RfidTag => rfidKodu;
+        public string RfidTag { get; set; } // Changed from expression-bodied property to normal property
         public virtual ICollection<MilkAnalysisResult> MilkAnalysisResults { get; set; } = new List<MilkAnalysisResult>();
         public virtual ICollection<MilkSample> MilkSamples { get; set; } = new List<MilkSample>();
         public virtual ICollection<AgirlikOlcum> WeightMeasurements { get; set; } = new List<AgirlikOlcum>();
@@ -79,8 +79,15 @@ namespace CYS.Models
                 kategori = hayvan.kategori,
                 ozellikler = hayvan.ozellikler,
                 requestId = hayvan.requestId,
-                sonGuncelleme = hayvan.sonGuncelleme
+                sonGuncelleme = hayvan.sonGuncelleme,
+                RfidTag = hayvan.rfidKodu // Initialize RfidTag from rfidKodu
             };
+        }
+        
+        // Constructor to ensure RfidTag is initialized
+        public Animal()
+        {
+            RfidTag = rfidKodu;
         }
     }
 }

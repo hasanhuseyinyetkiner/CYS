@@ -15,6 +15,9 @@ namespace CYS.Data
         public DbSet<WeaningWeightMeasurement> WeaningWeightMeasurements { get; set; }
         public DbSet<BirthWeightMeasurement> BirthWeightMeasurements { get; set; }
         
+        // Test API için model
+        public DbSet<TestWeightMeasurement> TestWeightMeasurements { get; set; }
+        
         // PostgreSQL sync tables - for storing data from client
         public DbSet<Animal> Animals { get; set; }
         public DbSet<AgirlikOlcum> AgirlikOlcums { get; set; }
@@ -23,7 +26,7 @@ namespace CYS.Data
         public DbSet<MilkQualityAssessment> MilkQualityAssessments { get; set; }
         public DbSet<Instrument> Instruments { get; set; }
         public DbSet<SyncStatus> SyncStatuses { get; set; }
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -76,6 +79,10 @@ namespace CYS.Data
 
             modelBuilder.Entity<SyncStatus>()
                 .HasIndex(s => new { s.TableName, s.LastSyncTime });
+                
+            // Test ölçüm modeli için index
+            modelBuilder.Entity<TestWeightMeasurement>()
+                .HasIndex(t => t.MeasurementDate);
         }
     }
 } 

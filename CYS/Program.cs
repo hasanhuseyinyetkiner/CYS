@@ -21,38 +21,152 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Text;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-
 namespace CYS
 {
     public class Program
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
-        }
+            var builder = WebApplication.CreateBuilder(args);
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureLogging((context, logging) =>
-                {
-                    // Clear default logging providers
-                    logging.ClearProviders();
+            // Uygulamayı tüm IP adreslerinden erişilebilir yap
+            builder.WebHost.UseUrls("http://0.0.0.0:5050");
 
-                    logging.AddConsole();
+            // Add services to the container.
+            builder.Services.AddControllersWithViews();
+            
+            // MySQL connection
+            string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseMySql(connectionString, 
+                    ServerVersion.AutoDetect(connectionString)));
 
-                    // Enable Windows EventLog provider only on Windows
-                    if (OperatingSystem.IsWindows())
-                    {
-                        logging.AddEventLog(settings =>
-                        {
-                            settings.SourceName = "CYS";
-                        });
-                    }
-                })
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options => {
+                    // JSON yapılandırması
                 });
+                
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "CYS API", Version = "v1" });
+                
+                // JWT Authentication for Swagger
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+                
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
+            });
+
+            // Repository sınıflarını servis olarak ekleyin
+            builder.Services.AddScoped<AnimalRepository>();
+            builder.Services.AddScoped<WeightMeasurementRepository>();
+            builder.Services.AddScoped<BirthWeightMeasurementRepository>();
+            builder.Services.AddScoped<WeaningWeightMeasurementRepository>();
+            builder.Services.AddScoped<MilkDataRepository>();
+            builder.Services.AddScoped<TestWeightRepository>(); // Test API için repository
+            
+            // JWT Token Service
+            builder.Services.AddScoped<JwtTokenService>();
+
+            // Diğer servisleri de burada ekleyebilirsiniz
+            // Authentication ayarları - JWT + Cookie
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+                    ValidAudience = builder.Configuration["JwtSettings:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"])),
+                    ClockSkew = TimeSpan.Zero
+                };
+            })
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+            {
+                options.LoginPath = "/Login";
+                options.LogoutPath = "/Logout";
+                options.AccessDeniedPath = "/Login";
+                options.ExpireTimeSpan = TimeSpan.FromDays(1);
+                options.SlidingExpiration = true;
+                options.Cookie.Name = "CYSCookie";
+            });
+
+            builder.Services.AddHostedService<CYSBackgroundService>();
+            // CORS politikası ekle
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+            });
+
+            var app = builder.Build();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+            }
+            
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "CYS API V1");
+            });
+            
+            app.UseStaticFiles();
+            app.UseRouting();
+            
+            // CORS middleware'ini etkinleştir
+            app.UseCors("AllowAll");
+            
+            app.UseAuthentication();
+            app.UseAuthorization();
+            
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+            });
+
+            // Önceki app.Urls.Add() satırını kaldırın
+            app.Run();
+        }
     }
     
     public class Startup
@@ -68,6 +182,7 @@ namespace CYS
         {
             services.AddControllersWithViews();
             
+            // MySQL connection
             string connectionString = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseMySql(connectionString, 
@@ -114,6 +229,7 @@ namespace CYS
             services.AddScoped<BirthWeightMeasurementRepository>();
             services.AddScoped<WeaningWeightMeasurementRepository>();
             services.AddScoped<MilkDataRepository>();
+            services.AddScoped<TestWeightRepository>(); // Test API için repository
             
             // JWT Token Service
             services.AddScoped<JwtTokenService>();
@@ -150,7 +266,17 @@ namespace CYS
             });
 
             services.AddHostedService<CYSBackgroundService>();
-            services.AddCors();
+            // CORS politikası ekle
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+            });
         }
         
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -173,13 +299,8 @@ namespace CYS
             app.UseStaticFiles();
             app.UseRouting();
             
-            app.UseCors(builder =>
-            {
-                builder
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-            });
+            // CORS middleware'ini etkinleştir
+            app.UseCors("AllowAll");
             
             app.UseAuthentication();
             app.UseAuthorization();
@@ -190,6 +311,9 @@ namespace CYS
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            // IApplicationBuilder'da Urls özelliği bulunmuyor
+            // Konfigürasyon builder.WebHost.UseUrls ile yapılmalı
         }
     }
 }
